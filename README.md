@@ -2,6 +2,11 @@
 
 `fastaug` is an NLP library for data augmentation with high speed.
 
+## Why fastaug?
+
+`fastaug` only provides a minimal set of augmentation funtions but may be rather fast: `10000` times faster than `nlpaug` (see `examples/performance.ipynb`), which is is a powerful toolkits providing many ways for data augmentation. `fastaug` is simple and naive, but (maybe) enough to meet your needs. You can write a class extending `fastaug.aug_ops.defs.AugOp` to implement your own function.
+
+
 ## Installation
 
 ```bash
