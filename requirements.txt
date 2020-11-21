@@ -1,0 +1,3 @@
+nltk
+numpy
+importlib_resources
