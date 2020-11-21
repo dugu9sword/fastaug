@@ -33,7 +33,10 @@ aug = Augmentor(
         CharRandomDelete(0.1)  
     ]
 )
-aug.augment("Five score years ago, a great American, in whose symbolic shadow we stand today, signed the Emancipation Proclamation.")
+aug.augment(
+    "Five score years ago, a great American, in whose symbolic shadow we stand today, signed the Emancipation Proclamation.",
+    n=3
+)
 ```
 
 **Result**
