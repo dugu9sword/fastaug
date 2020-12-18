@@ -1,12 +1,11 @@
-from pickle import TRUE
 import random
-from typing import List
+from typing import List, Dict
 import copy
-import pickle
 from .defs import AugOp
 from functools import lru_cache
 from nltk.corpus import wordnet as wn
 from ..util import load_resource, randint
+import json
 
 # extracted from nltk
 STOPWORDS = {
@@ -77,7 +76,8 @@ class WordSub(AugOp):
         random.shuffle(all_idxs)
         can_sub_idxs = []
         for idx in all_idxs:
-            if self.has_cands(tokens[idx]) and tokens[idx] not in STOPWORDS:
+            if self.has_cands(tokens[idx]):
+                #  and tokens[idx] not in STOPWORDS:
                 can_sub_idxs.append(idx)
             if len(can_sub_idxs) > self.aug_len(tokens):
                 break
@@ -109,7 +109,7 @@ class WordNetSub(WordSub):
 class WordMorphSub(WordSub):
     def __init__(self, aug_p: float) -> None:
         super().__init__(aug_p)
-        self.morphs = pickle.load(open(load_resource("morphs.p"), "rb"))
+        self.morphs = json.load(open(load_resource("morphs.json"), "r"))
 
     @lru_cache(maxsize=None)
     def has_cands(self, word):
@@ -148,11 +148,25 @@ class WordMorphSub(WordSub):
 #             return_words=True  #
 #         )
 
+# class WordEmbedSub(WordSub):
+#     def __init__(self, aug_p: float) -> None:
+#         super().__init__(aug_p)
+#         self.cands = json.load(
+#             open(load_resource("embed_top_16_dist_dot25.json"), "r"))
 
-class WordEmbedSub(WordSub):
-    def __init__(self, aug_p: float) -> None:
+#     @lru_cache(maxsize=None)
+#     def has_cands(self, word):
+#         return word in self.cands
+
+#     @lru_cache(maxsize=None)
+#     def get_cands(self, word):
+#         return self.cands[word]
+
+
+class WordDictSub(WordSub):
+    def __init__(self, aug_p: float, cands: Dict[str, List[str]]) -> None:
         super().__init__(aug_p)
-        self.cands = pickle.load(open(load_resource("embed_top16.p"), "rb"))
+        self.cands = cands
 
     @lru_cache(maxsize=None)
     def has_cands(self, word):
@@ -161,3 +175,10 @@ class WordEmbedSub(WordSub):
     @lru_cache(maxsize=None)
     def get_cands(self, word):
         return self.cands[word]
+
+
+class WordEmbedSub(WordDictSub):
+    def __init__(self, aug_p: float) -> None:
+        super().__init__(aug_p, cands=None)
+        self.cands = json.load(
+            open(load_resource("embed_top_16_dist_dot25.json"), "r"))

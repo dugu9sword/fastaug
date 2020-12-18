@@ -17,7 +17,7 @@ def randint(a, b):
 
 
 def cache_dir(dest_dir):
-    return Path(os.environ['HOME']) / ".cache" / "fastaug" / dest_dir
+    return Path(os.environ['HOME']).expanduser() / ".cache" / "fastaug" / dest_dir
 
 
 class DownloadUtil:
@@ -154,15 +154,15 @@ class EmbeddingNbrUtil:
             element: Union[int, str, torch.Tensor],
             measure='euc',
             topk=None,
-            rho=None,
+            dist=None,
             return_words=False,  # by default, return (D, I)
-            verbose=False):
+            ):
         # checking args
         assert measure in ['euc', 'cos']
-        if rho is not None:
-            assert (measure == 'euc' and rho > 0) or (
-                measure == 'cos' and 0 < rho < 1
-            ), "threshold for euc distance must be larger than 0, for cos distance must be between 0 and 1"
+        if dist is not None:
+            assert (measure == 'euc' and dist > 0) or (
+                measure == 'cos' and 0 < dist < 1
+            ), "threshold for euc distance must be larger than 0, for cos similarity must be between 0 and 1"
 
         measure_fn = cos_dist if measure == 'cos' else euc_dist
         query_vector = self.as_vector(element)
@@ -193,8 +193,8 @@ class EmbeddingNbrUtil:
         dists = measure_fn(query_vector, self.embed)
         tk_vals, tk_idxs = torch.topk(dists, _topk, largest=False)
 
-        if rho is not None:
-            mask_idx = tk_vals < rho
+        if dist is not None:
+            mask_idx = tk_vals < dist
             tk_vals = tk_vals[mask_idx]
             tk_idxs = tk_idxs[mask_idx]
 
